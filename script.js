@@ -7,6 +7,16 @@ const body = document.querySelector('body')
 const slideNext = document.querySelector('.slide-next');
 const slidePrev = document.querySelector('.slide-prev');
 
+const weatherIcon = document.querySelector('.weather-icon');
+const temperature = document.querySelector('.temperature');
+const weatherDescription = document.querySelector('.weather-description');
+const city = document.querySelector('.city');
+const wind = document.querySelector('.wind');
+const speed = document.querySelector('.speed');
+const speedDescription = document.querySelector('.speed-description');
+const humidityC = document.querySelector('.humidity-c');
+const humidityDescription = document.querySelector('.humidity-description');
+
 /* Time and Date block */
 function showTime() {
 	const timer = new Date()
@@ -58,6 +68,8 @@ function showGreeting() {
 // Save Data
 function setLocalStorage() {
 	localStorage.setItem('name', name.value);
+	//
+	localStorage.setItem('city', city.value);
 }
 
 window.addEventListener('beforeunload', setLocalStorage)
@@ -66,6 +78,11 @@ window.addEventListener('beforeunload', setLocalStorage)
 function getLocalStorage() {
 	if (localStorage.getItem('name')) {
 		name.value = localStorage.getItem('name');
+	}
+	if (localStorage.getItem('city')) {
+		city.value = localStorage.getItem('city');
+		getWeather();
+		city.blur();
 	}
 }
 
@@ -77,7 +94,6 @@ window.addEventListener('load', getLocalStorage)
 
 /* Image Slider */
 let randomNum;
-
 function getRandomNum() {
 	randomNum = Math.floor(Math.random() * 20) + 1
 	return randomNum
@@ -110,3 +126,31 @@ function getSlidePrev() {
 slideNext.addEventListener('click', getSlideNext);
 slidePrev.addEventListener('click', getSlidePrev);
 /* Image Slider */
+
+
+/* Weather */
+async function getWeather() {
+	const url = `https://api.openweathermap.org/data/2.5/weather?q=${city.value}&lang=en&appid=c64951852107a25165b37ccf1dc2be09&units=metric`;
+	const res = await fetch(url);
+	const data = await res.json();
+	
+	weatherIcon.className = 'weather-icon owf';
+	weatherIcon.classList.add(`owf-${data.weather[0].id}`);
+	temperature.textContent = `${data.main.temp.toFixed(0)}°C`;
+	weatherDescription.textContent = data.weather[0].description;
+	speed.textContent = `Wind speed: `
+	speedDescription.textContent = `${data.wind.speed}m / s`
+	humidityC.textContent = `Humidity: `;
+	humidityDescription.textContent = `${data.main.humidity}%`
+}
+
+function setCity(event) {
+	if (event.code === 'Enter') {
+		getWeather();
+		city.blur();
+	}
+}
+
+document.addEventListener('DOMContentLoaded', getWeather);
+city.addEventListener('keypress', setCity);
+/* Weather */
